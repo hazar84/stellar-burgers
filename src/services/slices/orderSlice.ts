@@ -60,6 +60,7 @@ export const orderSlice = createSlice({
       .addCase(postOrderBurger.rejected, (state, action) => {
         state.errorOrderData =
           (action.payload as string) || 'Ошибка при создании заказа';
+        state.orderRequest = false;
       })
       .addCase(postOrderBurger.fulfilled, (state, action) => {
         state.orderData = action.payload.order;
@@ -74,6 +75,7 @@ export const orderSlice = createSlice({
         state.loadingOrderByNumber = false;
         state.errorOrderByNumber =
           (action.payload as string) || 'Ошибка при получении заказа';
+        state.orderRequest = false;
       })
       .addCase(getOrderByNumber.fulfilled, (state, action) => {
         state.loadingOrderByNumber = false;
