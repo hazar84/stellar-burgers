@@ -1,4 +1,18 @@
 describe('Конструктор бургера — полный интеграционный тест', () => {
+  //Селекторы
+  const MODAL = '[data-cy="modal"]';
+  const MODAL_CONTENT = '[data-cy="modal-content"]';
+  const MODAL_CLOSE_BUTTON = '[data-cy="modal-close-button"]';
+  const MODAL_OVERLAY = '[data-cy="modal-overlay"]';
+  const ORDER_MODAL = '[data-cy="order-modal"]';
+  const CONSTRUCTOR_BUN_TOP = '[data-cy="constructor-bun-top"]';
+  const CONSTRUCTOR_BUN_BOTTOM = '[data-cy="constructor-bun-bottom"]';
+  const CONSTRUCTOR_INGREDIENT = '[data-cy^="constructor-ingredient-"]';
+  const TOTAL_PRICE = '[data-cy="total-price"]';
+  const ORDER_BUTTON = '[data-cy="order-button"]';
+  const ORDER_NUMBER = '[data-cy="order-number"]';
+
+  // Данные  
   const bunName = 'Краторная булка N-200i';
   const mainName = 'Биокотлета из марсианской Магнолии';
   const sauceName = 'Соус традиционный галактический';
@@ -43,11 +57,11 @@ describe('Конструктор бургера — полный интегра�
       .click({ force: true });
 
     // Проверяем, что булки добавились
-    cy.get('[data-cy="constructor-bun-top"]').should(
+    cy.get(CONSTRUCTOR_BUN_TOP).should(
       'contain',
       `${bunName} (верх)`
     );
-    cy.get('[data-cy="constructor-bun-bottom"]').should(
+    cy.get(CONSTRUCTOR_BUN_BOTTOM).should(
       'contain',
       `${bunName} (низ)`
     );
@@ -66,29 +80,63 @@ describe('Конструктор бургера — полный интегра�
       .click({ force: true });
 
     // Проверка цены: 1255*2 + 424 + 15 = 2949
-    cy.get('[data-cy="total-price"]').should('have.text', '2949');
+    cy.get(TOTAL_PRICE).should('have.text', '2949');
   });
 
   // Модальное окно ингредиента
-  it('Открывает и закрывает модальное окно ингредиента', () => {
+  it('Открывает и закрывает модальное окно ингредиента, проверяет детали', () => {
+    // Проверяем булку
     cy.contains(bunName).click();
+    cy.get(MODAL).should('be.visible');
+    cy.get(MODAL_CONTENT).should('contain', bunName);
 
-    cy.get('[data-cy="modal"]').should('be.visible');
-    cy.get('[data-cy="modal-content"]').should('contain', bunName);
+    // Проверяем, что в модалке отображаются детали булки
+    cy.get(MODAL_CONTENT).within(() => {
+      cy.contains(/^Калории,\s*ккал$/).next().should('have.text', '420');
+      cy.contains(/^Белки,\s*г$/).next().should('have.text', '80');
+      cy.contains(/^Жиры,\s*г$/).next().should('have.text', '24');
+      cy.contains(/^Углеводы,\s*г$/).next().should('have.text', '53');
+    });
 
     // Закрытие по крестику
-    cy.get('[data-cy="modal-close-button"]').click();
-    cy.get('[data-cy="modal"]').should('not.exist');
+    cy.get(MODAL_CLOSE_BUTTON).click();
+    cy.get(MODAL).should('not.exist');
 
-    // Повторное открытие
-    cy.contains(bunName).click();
-    cy.get('[data-cy="modal"]').should('be.visible');
+    // Проверяем биокотлету
+    cy.contains(mainName).click();
+    cy.get(MODAL).should('be.visible');
+    cy.get(MODAL_CONTENT).should('contain', mainName);
+
+    // Проверяем, что в модалке отображаются детали биокотлеты
+    cy.get(MODAL_CONTENT).within(() => {
+      cy.contains(/^Калории,\s*ккал$/).next().should('have.text', '4242');
+      cy.contains(/^Белки,\s*г$/).next().should('have.text', '420');
+      cy.contains(/^Жиры,\s*г$/).next().should('have.text', '142');
+      cy.contains(/^Углеводы,\s*г$/).next().should('have.text', '242');
+    });
 
     // Закрытие по оверлею
-    cy.get('[data-cy="modal"]')
-      .siblings('[data-cy="modal-overlay"]')
+    cy.get(MODAL)
+      .siblings(MODAL_OVERLAY)
       .click({ force: true });
-    cy.get('[data-cy="modal"]').should('not.exist');
+    cy.get(MODAL).should('not.exist');
+
+    // Проверяем соус
+    cy.contains(sauceName).click();
+    cy.get(MODAL).should('be.visible');
+    cy.get(MODAL_CONTENT).should('contain', sauceName);
+
+    // Проверяем, что в модалке отображаются детали соуса
+    cy.get(MODAL_CONTENT).within(() => {
+      cy.contains(/^Калории,\s*ккал$/).next().should('have.text', '99');
+      cy.contains(/^Белки,\s*г$/).next().should('have.text', '42');
+      cy.contains(/^Жиры,\s*г$/).next().should('have.text', '24');
+      cy.contains(/^Углеводы,\s*г$/).next().should('have.text', '42');
+    });
+
+    // Закрываем по esc
+    cy.get('body').type('{esc}');
+    cy.get(MODAL).should('not.exist');
   });
 
   // Оформление заказа
@@ -113,7 +161,7 @@ describe('Конструктор бургера — полный интегра�
       .click({ force: true });
 
     // Кликаем "Оформить заказ"
-    cy.get('[data-cy="order-button"]').click();
+    cy.get(ORDER_BUTTON).click();
 
     // Проверяем запрос
     cy.wait('@createOrder')
@@ -121,17 +169,17 @@ describe('Конструктор бургера — полный интегра�
       .should('eq', 12345);
 
     // Проверяем модальное окно
-    cy.get('[data-cy="modal"]').should('be.visible');
-    cy.get('[data-cy="order-number"]').should('have.text', '12345');
+    cy.get(MODAL).should('be.visible');
+    cy.get(ORDER_NUMBER).should('have.text', '12345');
 
     // Закрываем
-    cy.get('[data-cy="modal-close-button"]').click();
-    cy.get('[data-cy="order-modal"]').should('not.exist');
+    cy.get(MODAL_CLOSE_BUTTON).click();
+    cy.get(ORDER_MODAL).should('not.exist');
 
     // Проверяем, что конструктор очистился
-    cy.get('[data-cy="constructor-bun-top"]').should('not.exist');
-    cy.get('[data-cy="constructor-bun-bottom"]').should('not.exist');
-    cy.get('[data-cy^="constructor-ingredient-"]').should('have.length', 0);
-    cy.get('[data-cy="total-price"]').should('have.text', '0');
+    cy.get(CONSTRUCTOR_BUN_TOP).should('not.exist');
+    cy.get(CONSTRUCTOR_BUN_BOTTOM).should('not.exist');
+    cy.get(CONSTRUCTOR_INGREDIENT).should('have.length', 0);
+    cy.get(TOTAL_PRICE).should('have.text', '0');
   });
 });
