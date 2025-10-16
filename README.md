@@ -32,5 +32,17 @@
 
 ### 1. Клонирование репозитория
 ```bash
-git clone 
-cd react-canonical
+git clone https://github.com/hazar84/stellar-burgers.git
+cd stellar-burgers
+```
+
+### 2. Установка зависимостей
+```bash
+npm install
+```
+
+### 3. Запуск в режиме разработки
+```bash
+npm start
+```
+Приложение будет доступно по адресу: http://localhost:4000
