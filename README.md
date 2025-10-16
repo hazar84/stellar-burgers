@@ -32,5 +32,5 @@
 
 ### 1. Клонирование репозитория
 ```bash
-git clone [URL-репозитория]
+git clone 
 cd react-canonical
